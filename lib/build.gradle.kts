@@ -47,6 +47,7 @@ dependencies {
     implementation(libs.guava)
 
     // Uniffi
+    implementation("net.java.dev.jna:jna:5.13.0@aar")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4")
 
     // Android test dependencies
@@ -64,16 +65,16 @@ dependencies {
 // Configure Android test options
 android {
     namespace = "com.github.zkmopro"
-    compileSdk = 34
+    compileSdk = 35
     
     defaultConfig {
         minSdk = 21
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         
-        // Add JNA native library support
-        ndk {
-            abiFilters += listOf("arm64-v8a", "armeabi-v7a", "x86", "x86_64")
-        }
+        // // Add JNA native library support
+        // ndk {
+        //     abiFilters += listOf("arm64-v8a", "armeabi-v7a", "x86", "x86_64")
+        // }
     }
     
     buildTypes {
@@ -93,7 +94,7 @@ android {
     }
     
     testOptions {
-        targetSdk = 34
+        targetSdk = 35
         unitTests {
             isIncludeAndroidResources = true
             isReturnDefaultValues = true
@@ -101,7 +102,7 @@ android {
     }
     
     lint {
-        targetSdk = 34
+        targetSdk = 35
     }
     
     // Add packaging options to include native libraries
