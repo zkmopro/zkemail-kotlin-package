@@ -47,7 +47,6 @@ dependencies {
     implementation(libs.guava)
 
     // Uniffi
-    implementation("net.java.dev.jna:jna:5.13.0@aar")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4")
 
     // Android test dependencies
