@@ -13,6 +13,9 @@ plugins {
     `java-library`
 }
 
+group = "com.github.zkmopro"    
+version = "0.2.0" 
+
 repositories {
     // Use Maven Central for resolving dependencies.
     mavenCentral()
