@@ -6,11 +6,11 @@
  */
 
 plugins {
-    // Apply the org.jetbrains.kotlin.jvm Plugin to add support for Kotlin.
-    alias(libs.plugins.kotlin.jvm)
-
-    // Apply the java-library plugin for API and implementation separation.
-    `java-library`
+    // Apply the Kotlin Android plugin
+    id("org.jetbrains.kotlin.android") version "1.9.22"
+    
+    // Add Android plugin for instrumented tests
+    id("com.android.library") version "8.2.2"
 }
 
 group = "com.github.zkmopro"    
@@ -19,6 +19,16 @@ version = "0.2.0"
 repositories {
     // Use Maven Central for resolving dependencies.
     mavenCentral()
+    google()
+}
+
+configurations.all {
+    resolutionStrategy {
+        // Force specific versions of dependencies to avoid conflicts
+        force("androidx.test:runner:1.5.2")
+        force("androidx.test:core:1.5.0")
+        force("androidx.test.ext:junit:1.1.5")
+    }
 }
 
 dependencies {
@@ -37,18 +47,68 @@ dependencies {
     implementation(libs.guava)
 
     // Uniffi
-    implementation("net.java.dev.jna:jna:5.13.0")
+    implementation("net.java.dev.jna:jna:5.13.0@aar")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4")
+
+    // Android test dependencies
+    androidTestImplementation("androidx.test:runner:1.5.2")
+    androidTestImplementation("androidx.test:rules:1.5.0")
+    androidTestImplementation("androidx.test.ext:junit:1.1.5")
+    androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
+    
+    // Add the AndroidX Test Runner as a direct dependency
+    androidTestImplementation("androidx.test:core:1.5.0")
+    androidTestImplementation("androidx.test:core-ktx:1.5.0")
+    androidTestImplementation("androidx.test.ext:junit-ktx:1.1.5")
 }
 
-// Apply a specific Java toolchain to ease working on different environments.
-java {
-    toolchain {
-        languageVersion = JavaLanguageVersion.of(19)
+// Configure Android test options
+android {
+    namespace = "com.github.zkmopro"
+    compileSdk = 34
+    
+    defaultConfig {
+        minSdk = 21
+        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        
+        // Add JNA native library support
+        ndk {
+            abiFilters += listOf("arm64-v8a", "armeabi-v7a", "x86", "x86_64")
+        }
     }
-}
-
-tasks.named<Test>("test") {
-    // Use JUnit Platform for unit tests.
-    useJUnitPlatform()
+    
+    buildTypes {
+        release {
+            isMinifyEnabled = false
+            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
+        }
+    }
+    
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_1_8
+        targetCompatibility = JavaVersion.VERSION_1_8
+    }
+    
+    kotlinOptions {
+        jvmTarget = "1.8"
+    }
+    
+    testOptions {
+        targetSdk = 34
+        unitTests {
+            isIncludeAndroidResources = true
+            isReturnDefaultValues = true
+        }
+    }
+    
+    lint {
+        targetSdk = 34
+    }
+    
+    // Add packaging options to include native libraries
+    packaging {
+        jniLibs {
+            useLegacyPackaging = true
+        }
+    }
 }
