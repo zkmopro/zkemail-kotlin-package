@@ -32,6 +32,10 @@ dependencies {
 
     // This dependency is used internally, and not exposed to consumers on their own compile classpath.
     implementation(libs.guava)
+
+    // Uniffi
+    implementation("net.java.dev.jna:jna:5.13.0")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4")
 }
 
 // Apply a specific Java toolchain to ease working on different environments.
