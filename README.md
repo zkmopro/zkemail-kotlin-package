@@ -1,12 +1,12 @@
-[![](https://jitpack.io/v/zkmopro/mopro-kotlin-package.svg)](https://jitpack.io/#zkmopro/mopro-kotlin-package)
+[![](https://jitpack.io/v/zkmopro/zkemail-kotlin-package.svg)](https://jitpack.io/#zkmopro/zkemail-kotlin-package)
 
-# Mopro Kotlin Package
+# zkEmail Kotlin Package via MoproFFI
 
-A Kotlin/Android library for generating and verifying zero-knowledge proofs (ZKPs) using native Rust code via UniFFI and JNI. This package provides a simple interface to interact with proof systems such as Circom and Halo2, supporting multiple proof libraries (e.g., Arkworks, Rapidsnark).
+A Kotlin/Android library for generating and verifying zero-knowledge proofs (ZKPs) for the zkemail project, using native Rust code via UniFFI and JNI. This package provides a simple interface to interact with the zkemail proof system.
 
-## Getting mopro via JitPack
+## Getting zkemail via JitPack
 
-To get this library from GitHub using [JitPack](https://jitpack.io/#zkmopro/mopro-kotlin-package):
+To get this library from GitHub using [JitPack](https://jitpack.io/#zkmopro/zkemail-kotlin-package):
 
 **Step 1.** Add the JitPack repository to your `settings.gradle.kts` at the end of repositories:
 ```kotlin
@@ -22,10 +22,10 @@ dependencyResolutionManagement {
 **Step 2.** Add the dependency to your `build.gradle.kts`:
 ```kotlin
   dependencies {
-      implementation("com.github.zkmopro:mopro-kotlin-package:Tag")
+      implementation("com.github.zkmopro:zkemail-kotlin-package:Tag")
   }
 ```
-Replace `Tag` with the desired release version, e.g. `v0.1.0`. See the [JitPack page](https://jitpack.io/#zkmopro/mopro-kotlin-package) for available versions.
+Replace `Tag` with the desired release version, e.g. `v0.2.0`. See the [JitPack page](https://jitpack.io/#zkmopro/zkemail-kotlin-package) for available versions.
 
 **Note:** If you're using an Android template from `mopro create`, comment out these UniFFI dependencies in your build file to prevent duplicate class errors.
 ```kotlin
@@ -36,20 +36,45 @@ Replace `Tag` with the desired release version, e.g. `v0.1.0`. See the [JitPack 
 
 ## Usage Example
 ```kotlin
-import uniffi.mopro.generateCircomProof
-import uniffi.mopro.verifyCircomProof
-import uniffi.mopro.ProofLib
+import uniffi.mopro.proveZkemail
+import uniffi.mopro.verifyZkemail
 
-val inputStr = "{\"b\":[\"5\"],\"a\":[\"3\"]}"
-val zkeyPath = "/path/to/multiplier2_final.zkey"
-val proof = generateCircomProof(zkeyPath, inputStr, ProofLib.ARKWORKS)
-val isValid = verifyCircomProof(zkeyPath, proof, ProofLib.ARKWORKS)
+// Prepare your inputs as a Map<String, List<String>>
+// Example structure (replace with your actual data):
+val inputs = mapOf(
+    "header_storage" to listOf("123", "456" /* ... more items ... */),
+    "header_len" to listOf("10"),
+    "pubkey_modulus" to listOf("abc", "def" /* ... more items ... */),
+    "pubkey_redc" to listOf("ghi", "jkl" /* ... more items ... */),
+    "signature" to listOf("mno", "pqr" /* ... more items ... */),
+    "date_index" to listOf("1"),
+    "subject_index" to listOf("2"),
+    "subject_length" to listOf("20"),
+    "from_header_index" to listOf("3"),
+    "from_header_length" to listOf("30"),
+    "from_address_index" to listOf("4"),
+    "from_address_length" to listOf("40")
+)
+
+// Provide the path to your SRS file
+val srsPath = "/path/to/your/srs.local"
+
+try {
+    // Generate Proof
+    val proof = proveZkemail(srsPath, inputs)
+    println("Proof generated successfully.")
+
+    // Verify Proof
+    val isValid = verifyZkemail(srsPath, proof)
+    println("Proof verification result: $isValid")
+
+} catch (e: Exception) { // Replace with specific MoproException if needed
+    println("Error: ${e.message}")
+}
 ```
 
 > [!WARNING]  
-> The default bindings are built specifically for the `multiplier2` circom circuit. If you'd like to update the circuit or switch to a different proving scheme, please refer to the [How to Build the Package](#how-to-build-the-package) section.<br/>
-> Circuit source code: https://github.com/zkmopro/circuit-registry/tree/main/multiplier2<br/>
-> Example .zkey file for the circuit: http://ci-keys.zkmopro.org/multiplier2_final.zkey<br/>
+> The default bindings are built specifically for the zkemail circuit. If you'd like to update the circuit or switch to a different proving scheme, please refer to the [How to Build the Package](#how-to-build-the-package) section.
 
 ## How to Build the Package
 
