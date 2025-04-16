@@ -25,7 +25,7 @@ dependencyResolutionManagement {
       implementation("com.github.zkmopro:zkemail-kotlin-package:Tag")
   }
 ```
-Replace `Tag` with the desired release version, e.g. `v0.2.0`. See the [JitPack page](https://jitpack.io/#zkmopro/zkemail-kotlin-package) for available versions.
+Replace `Tag` with the desired release version, e.g. `v0.2.2`. See the [JitPack page](https://jitpack.io/#zkmopro/zkemail-kotlin-package) for available versions.
 
 **Note:** If you're using an Android template from `mopro create`, comment out these UniFFI dependencies in your build file to prevent duplicate class errors.
 ```kotlin
