@@ -19,32 +19,69 @@ class MoproTest {
         assertEquals("com.github.zkmopro.test", appContext.packageName)
     }
 
-    // Add more test methods here for testing Mopro functionality
-    // Example:
     @Test
-    fun testMoproFunctionality() {
-        val input_str: String = "{\"b\":[\"5\"],\"a\":[\"3\"]}"
-
+    fun testZkemailFunctionality() {
         val appContext = InstrumentationRegistry.getInstrumentation().context
 
-        // Read from assets and copy to temporary file
-        val tempFile = File(appContext.cacheDir, "multiplier2_final.zkey")
-        appContext.assets.open("multiplier2_final.zkey").use { input ->
-            tempFile.outputStream().use { output ->
+        // Copy srs.local from assets to a temp file
+        val srsFile = File(appContext.cacheDir, "srs.local")
+        appContext.assets.open("srs.local").use { input ->
+            srsFile.outputStream().use { output ->
                 input.copyTo(output)
             }
         }
-        
-        val zkeyPath = tempFile.absolutePath
-        
+        val srsPath = srsFile.absolutePath
+
+        // Copy zkemail_input.json from assets to a temp file and parse it
+        val inputFile = File(appContext.cacheDir, "zkemail_input.json")
+        appContext.assets.open("zkemail_input.json").use { input ->
+            inputFile.outputStream().use { output ->
+                input.copyTo(output)
+            }
+        }
+        val jsonContent = inputFile.readText()
+        val jsonObject = org.json.JSONObject(jsonContent)
+        val inputs = HashMap<String, List<String>>()
+        val headerStorage = jsonObject.getJSONObject("header").getJSONArray("storage")
+        val headerStorageList = mutableListOf<String>()
+        for (i in 0 until headerStorage.length()) {
+            headerStorageList.add(headerStorage.getInt(i).toString())
+        }
+        inputs["header_storage"] = headerStorageList
+        inputs["header_len"] = listOf(jsonObject.getJSONObject("header").getInt("len").toString())
+        val pubkeyModulus = jsonObject.getJSONObject("pubkey").getJSONArray("modulus")
+        val pubkeyModulusList = mutableListOf<String>()
+        for (i in 0 until pubkeyModulus.length()) {
+            pubkeyModulusList.add(pubkeyModulus.getString(i))
+        }
+        inputs["pubkey_modulus"] = pubkeyModulusList
+        val pubkeyRedc = jsonObject.getJSONObject("pubkey").getJSONArray("redc")
+        val pubkeyRedcList = mutableListOf<String>()
+        for (i in 0 until pubkeyRedc.length()) {
+            pubkeyRedcList.add(pubkeyRedc.getString(i))
+        }
+        inputs["pubkey_redc"] = pubkeyRedcList
+        val signature = jsonObject.getJSONArray("signature")
+        val signatureList = mutableListOf<String>()
+        for (i in 0 until signature.length()) {
+            signatureList.add(signature.getString(i))
+        }
+        inputs["signature"] = signatureList
+        inputs["date_index"] = listOf(jsonObject.getInt("date_index").toString())
+        inputs["subject_index"] = listOf(jsonObject.getJSONObject("subject_sequence").getInt("index").toString())
+        inputs["subject_length"] = listOf(jsonObject.getJSONObject("subject_sequence").getInt("length").toString())
+        inputs["from_header_index"] = listOf(jsonObject.getJSONObject("from_header_sequence").getInt("index").toString())
+        inputs["from_header_length"] = listOf(jsonObject.getJSONObject("from_header_sequence").getInt("length").toString())
+        inputs["from_address_index"] = listOf(jsonObject.getJSONObject("from_address_sequence").getInt("index").toString())
+        inputs["from_address_length"] = listOf(jsonObject.getJSONObject("from_address_sequence").getInt("length").toString())
+
         try {
-            val res = generateCircomProof(zkeyPath, input_str, ProofLib.ARKWORKS)
-            val valid = verifyCircomProof(zkeyPath, res, ProofLib.ARKWORKS)
-            assertEquals(valid, true)
+            val proof = proveZkemail(srsPath, inputs)
+            val valid = verifyZkemail(srsPath, proof)
+            assertEquals(true, valid)
         } finally {
-            // Clean up the temporary file
-            tempFile.delete()
+            srsFile.delete()
+            inputFile.delete()
         }
     }
-    
 } 
