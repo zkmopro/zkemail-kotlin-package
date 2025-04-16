@@ -768,9 +768,15 @@ internal interface IntegrityCheckingUniffiLib : Library {
 
     fun uniffi_mopro_bindings_checksum_func_generate_halo2_proof(): Short
 
+    fun uniffi_mopro_bindings_checksum_func_prove(): Short
+
+    fun uniffi_mopro_bindings_checksum_func_prove_zkemail(): Short
+
     fun uniffi_mopro_bindings_checksum_func_verify_circom_proof(): Short
 
     fun uniffi_mopro_bindings_checksum_func_verify_halo2_proof(): Short
+
+    fun uniffi_mopro_bindings_checksum_func_verify_zkemail(): Short
 
     fun ffi_mopro_bindings_uniffi_contract_version(): Int
 }
@@ -828,6 +834,14 @@ internal interface UniffiLib : Library {
         uniffi_out_err: UniffiRustCallStatus,
     ): RustBuffer.ByValue
 
+    fun uniffi_mopro_bindings_fn_func_prove(uniffi_out_err: UniffiRustCallStatus): Byte
+
+    fun uniffi_mopro_bindings_fn_func_prove_zkemail(
+        `srsPath`: RustBuffer.ByValue,
+        `inputs`: RustBuffer.ByValue,
+        uniffi_out_err: UniffiRustCallStatus,
+    ): RustBuffer.ByValue
+
     fun uniffi_mopro_bindings_fn_func_verify_circom_proof(
         `zkeyPath`: RustBuffer.ByValue,
         `proofResult`: RustBuffer.ByValue,
@@ -840,6 +854,12 @@ internal interface UniffiLib : Library {
         `vkPath`: RustBuffer.ByValue,
         `proof`: RustBuffer.ByValue,
         `publicInput`: RustBuffer.ByValue,
+        uniffi_out_err: UniffiRustCallStatus,
+    ): Byte
+
+    fun uniffi_mopro_bindings_fn_func_verify_zkemail(
+        `srsPath`: RustBuffer.ByValue,
+        `proof`: RustBuffer.ByValue,
         uniffi_out_err: UniffiRustCallStatus,
     ): Byte
 
@@ -1078,10 +1098,19 @@ private fun uniffiCheckApiChecksums(lib: IntegrityCheckingUniffiLib) {
     if (lib.uniffi_mopro_bindings_checksum_func_generate_halo2_proof() != 28088.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
+    if (lib.uniffi_mopro_bindings_checksum_func_prove() != 46869.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_mopro_bindings_checksum_func_prove_zkemail() != 12783.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
     if (lib.uniffi_mopro_bindings_checksum_func_verify_circom_proof() != 14151.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if (lib.uniffi_mopro_bindings_checksum_func_verify_halo2_proof() != 24562.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_mopro_bindings_checksum_func_verify_zkemail() != 8016.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
 }
@@ -1623,6 +1652,29 @@ fun `generateHalo2Proof`(
         },
     )
 
+fun `prove`(): kotlin.Boolean =
+    FfiConverterBoolean.lift(
+        uniffiRustCall { _status ->
+            UniffiLib.INSTANCE.uniffi_mopro_bindings_fn_func_prove(
+                _status,
+            )
+        },
+    )
+
+fun `proveZkemail`(
+    `srsPath`: kotlin.String,
+    `inputs`: Map<kotlin.String, List<kotlin.String>>,
+): kotlin.ByteArray =
+    FfiConverterByteArray.lift(
+        uniffiRustCall { _status ->
+            UniffiLib.INSTANCE.uniffi_mopro_bindings_fn_func_prove_zkemail(
+                FfiConverterString.lower(`srsPath`),
+                FfiConverterMapStringSequenceString.lower(`inputs`),
+                _status,
+            )
+        },
+    )
+
 @Throws(MoproException::class)
 fun `verifyCircomProof`(
     `zkeyPath`: kotlin.String,
@@ -1654,6 +1706,20 @@ fun `verifyHalo2Proof`(
                 FfiConverterString.lower(`vkPath`),
                 FfiConverterByteArray.lower(`proof`),
                 FfiConverterByteArray.lower(`publicInput`),
+                _status,
+            )
+        },
+    )
+
+fun `verifyZkemail`(
+    `srsPath`: kotlin.String,
+    `proof`: kotlin.ByteArray,
+): kotlin.Boolean =
+    FfiConverterBoolean.lift(
+        uniffiRustCall { _status ->
+            UniffiLib.INSTANCE.uniffi_mopro_bindings_fn_func_verify_zkemail(
+                FfiConverterString.lower(`srsPath`),
+                FfiConverterByteArray.lower(`proof`),
                 _status,
             )
         },
